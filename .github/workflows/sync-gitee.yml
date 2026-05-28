@@ -1,0 +1,16 @@
+name: Sync to Gitee
+on:
+  push:
+    branches: [ main ]  # 你的GitHub博客分支名
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mirror GitHub to Gitee
+        uses: Yikun/hub-mirror-action@master
+        with:
+          src: github/an3035
+          dst: gitee/an3035
+          dst_key: ${{ secrets.GITEE_TOKEN }}
+          static_list: "an3035.github.io"  # 你的GitHub仓库名
+          force_update: true
