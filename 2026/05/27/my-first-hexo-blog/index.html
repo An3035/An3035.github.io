@@ -1,0 +1,243 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>我的第一个 Hexo 博客上线了 | An3035的技术小屋</title><meta name="author" content="An"><meta name="copyright" content="An"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="折腾了两天，我的 Hexo 博客终于上线了。从零到一，踩了不少坑，写篇文章记录一下。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="我的第一个 Hexo 博客上线了">
+<meta property="og:url" content="https://an3035.github.io/2026/05/27/my-first-hexo-blog/index.html">
+<meta property="og:site_name" content="An3035的技术小屋">
+<meta property="og:description" content="折腾了两天，我的 Hexo 博客终于上线了。从零到一，踩了不少坑，写篇文章记录一下。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://avatars.githubusercontent.com/An3035">
+<meta property="article:published_time" content="2026-05-27T13:04:00.000Z">
+<meta property="article:modified_time" content="2026-05-27T13:04:25.630Z">
+<meta property="article:author" content="An">
+<meta property="article:tag" content="Hexo">
+<meta property="article:tag" content="博客">
+<meta property="article:tag" content="折腾">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://avatars.githubusercontent.com/An3035"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "我的第一个 Hexo 博客上线了",
+  "url": "https://an3035.github.io/2026/05/27/my-first-hexo-blog/",
+  "image": "https://avatars.githubusercontent.com/An3035",
+  "datePublished": "2026-05-27T13:04:00.000Z",
+  "dateModified": "2026-05-27T13:04:25.630Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "An",
+      "url": "https://an3035.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://an3035.github.io/2026/05/27/my-first-hexo-blog/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.5-b1"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', () => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '我的第一个 Hexo 博客上线了',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://avatars.githubusercontent.com/An3035" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">5</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于我</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">An3035的技术小屋</span></a><a class="nav-page-title" href="/"><span class="site-name">我的第一个 Hexo 博客上线了</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于我</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">我的第一个 Hexo 博客上线了</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-27T13:04:00.000Z" title="发表于 2026-05-27 21:04:00">2026-05-27</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-27T13:04:25.630Z" title="更新于 2026-05-27 21:04:25">2026-05-27</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E9%9A%8F%E7%AC%94/">随笔</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">676</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>2分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>折腾了两天，我的 Hexo 博客终于上线了。从零到一，踩了不少坑，写篇文章记录一下。</p>
+<span id="more"></span>
+
+<h2 id="为什么选-Hexo"><a href="#为什么选-Hexo" class="headerlink" title="为什么选 Hexo"></a>为什么选 Hexo</h2><p>需求很简单：静态博客、Markdown 写作、免费托管、能自定义主题。WordPress 太重，Notion 不够 geek，选了一圈最后锁定了 Hexo + GitHub Pages。Node.js 生态、中文社区活跃、Butterfly 主题颜值在线，够了。</p>
+<h2 id="环境配置，比想象的顺"><a href="#环境配置，比想象的顺" class="headerlink" title="环境配置，比想象的顺"></a>环境配置，比想象的顺</h2><p>Node.js 和 Git 都是现成的，三条命令就起跑了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br><span class="line">hexo init my-blog</span><br><span class="line"><span class="built_in">cd</span> my-blog &amp;&amp; npm install</span><br></pre></td></tr></table></figure>
+
+<p><code>hexo s</code> 跑起来，<code>localhost:4000</code> 看到默认页面的那一刻，还是有点小激动的。</p>
+<h2 id="主题选了-Butterfly"><a href="#主题选了-Butterfly" class="headerlink" title="主题选了 Butterfly"></a>主题选了 Butterfly</h2><p>默认 Landscape 太素了，对比了几个热门主题后选了 Butterfly。好看，配置项多，中文文档完整。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-theme-butterfly --save</span><br></pre></td></tr></table></figure>
+
+<p>改 <code>_config.yml</code> 里一行：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">theme:</span> <span class="string">butterfly</span></span><br></pre></td></tr></table></figure>
+
+<p>然后从主题目录拷一份 <code>_config.butterfly.yml</code> 出来改。导航栏、头像、暗黑模式、侧边栏、字数统计，零零碎碎调了一下午。</p>
+<h2 id="踩坑记录"><a href="#踩坑记录" class="headerlink" title="踩坑记录"></a>踩坑记录</h2><h3 id="坑-1：totalcount-is-not-a-function"><a href="#坑-1：totalcount-is-not-a-function" class="headerlink" title="坑 1：totalcount is not a function"></a>坑 1：<code>totalcount is not a function</code></h3><p>开启字数统计功能后报了这个错。原因很简单——忘了装 <code>hexo-wordcount</code> 插件。<code>npm install</code> 一下就解决了。Butterfly 很多功能只负责展示，底层依赖的插件要自己装。</p>
+<h3 id="坑-2：自定义-CSS-不生效"><a href="#坑-2：自定义-CSS-不生效" class="headerlink" title="坑 2：自定义 CSS 不生效"></a>坑 2：自定义 CSS 不生效</h3><p>在 <code>source/css/</code> 下写好了 <code>custom.css</code>，页面死活不加载。检查了半天发现要去 <code>_config.butterfly.yml</code> 的 <code>inject.head</code> 里手动注入：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">inject:</span></span><br><span class="line">  <span class="attr">head:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&lt;link</span> <span class="string">rel=&quot;stylesheet&quot;</span> <span class="string">href=&quot;/css/custom.css&quot;&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>Hexo 生成的时候才会把 <code>source/</code> 下的文件原样拷到 <code>public/</code>，但 link 标签要自己加。</p>
+<h3 id="坑-3：部署权限"><a href="#坑-3：部署权限" class="headerlink" title="坑 3：部署权限"></a>坑 3：部署权限</h3><p><code>hexo d</code> 往 GitHub 推送的时候报了 403。原因是用的 HTTPS 地址，需要 Personal Access Token 认证。后来切成了 SSH 地址就一劳永逸了：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">git@github.com:An3035/An3035.github.io.git</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">main</span></span><br></pre></td></tr></table></figure>
+
+<p>前提是本地配过 SSH key 并加到 GitHub。</p>
+<h2 id="目前装了的插件"><a href="#目前装了的插件" class="headerlink" title="目前装了的插件"></a>目前装了的插件</h2><table>
+<thead>
+<tr>
+<th>插件</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>hexo-deployer-git</code></td>
+<td>一键部署到 GitHub Pages</td>
+</tr>
+<tr>
+<td><code>hexo-generator-search</code></td>
+<td>站内搜索</td>
+</tr>
+<tr>
+<td><code>hexo-generator-searchdb</code></td>
+<td>搜索数据库</td>
+</tr>
+<tr>
+<td><code>hexo-generator-sitemap</code></td>
+<td>SEO 站点地图</td>
+</tr>
+<tr>
+<td><code>hexo-wordcount</code></td>
+<td>文章字数 &amp; 阅读时长</td>
+</tr>
+<tr>
+<td>不蒜子（内置）</td>
+<td>访问量统计</td>
+</tr>
+</tbody></table>
+<h2 id="日常三件套"><a href="#日常三件套" class="headerlink" title="日常三件套"></a>日常三件套</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo new <span class="string">&quot;文章标题&quot;</span>         <span class="comment"># 新建文章</span></span><br><span class="line">hexo s                     <span class="comment"># 本地预览</span></span><br><span class="line">hexo clean &amp;&amp; hexo g &amp;&amp; hexo d   <span class="comment"># 上线部署</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="接下来"><a href="#接下来" class="headerlink" title="接下来"></a>接下来</h2><p>博客架子搭好了，接下来该认真写点东西了。计划先整理一下最近学的内容：AI 工具链、全栈项目笔记、一些踩坑记录。Flag 立在这里，督促自己保持更新频率。</p>
+<hr>
+<p>第一天上线，就这样吧。如果你也在折腾 Hexo，希望这篇能帮你少走点弯路。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://an3035.github.io">An</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://an3035.github.io/2026/05/27/my-first-hexo-blog/">https://an3035.github.io/2026/05/27/my-first-hexo-blog/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://an3035.github.io" target="_blank">An3035的技术小屋</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Hexo/">Hexo</a><a class="post-meta__tags" href="/tags/%E5%8D%9A%E5%AE%A2/">博客</a><a class="post-meta__tags" href="/tags/%E6%8A%98%E8%85%BE/">折腾</a></div><div class="post-share"><div class="social-share" data-image="https://avatars.githubusercontent.com/An3035" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/05/27/hexo-build-pitfalls/" title="Hexo 博客搭建踩坑记录"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Hexo 博客搭建踩坑记录</div></div><div class="info-2"><div class="info-item-1">从零搭建一个 Hexo + Butterfly + GitHub Pages 博客，看着简单，实操下来还是踩了不少坑。这篇文章把过程中遇到的问题和解决方案整理出来，给同样在折腾的人一个参考。   环境准备Node.js 和 Git 是前提，版本别太老就行： 123node --version  # v18+git --version   # 2.x+npm --version  这一步基本不会出问题，跳过。 坑 1：Hexo 初始化目录必须为空这是第一个低级错误。hexo init 要求目标目录是空文件夹，如果你提前建了目录并往里放了东西，init 会失败。 正确姿势： 123mkdir my-blogcd my-bloghexo init .  或者让 Hexo 自己建目录： 123hexo init my-blogcd my-blognpm install  坑 2：主题配置文件到底在哪改Butterfly 主题安装完后，配置文件的加载优先级是这样的：  _config.butterfly.yml（项目根目录，优先级最高） themes/butterfly/_config.y...</div></div></div></a><a class="pagination-related  no-desc" href="/2026/05/27/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E6%8A%80%E6%9C%AF%E5%8D%9A%E5%AE%A2/" title="我的第一篇技术博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">我的第一篇技术博客</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/05/27/hexo-build-pitfalls/" title="Hexo 博客搭建踩坑记录"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-27</div><div class="info-item-2">Hexo 博客搭建踩坑记录</div></div><div class="info-2"><div class="info-item-1">从零搭建一个 Hexo + Butterfly + GitHub Pages 博客，看着简单，实操下来还是踩了不少坑。这篇文章把过程中遇到的问题和解决方案整理出来，给同样在折腾的人一个参考。   环境准备Node.js 和 Git 是前提，版本别太老就行： 123node --version  # v18+git --version   # 2.x+npm --version  这一步基本不会出问题，跳过。 坑 1：Hexo 初始化目录必须为空这是第一个低级错误。hexo init 要求目标目录是空文件夹，如果你提前建了目录并往里放了东西，init 会失败。 正确姿势： 123mkdir my-blogcd my-bloghexo init .  或者让 Hexo 自己建目录： 123hexo init my-blogcd my-blognpm install  坑 2：主题配置文件到底在哪改Butterfly 主题安装完后，配置文件的加载优先级是这样的：  _config.butterfly.yml（项目根目录，优先级最高） themes/butterfly/_config.y...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://avatars.githubusercontent.com/An3035" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">An</div><div class="author-info-description">全栈开发者 / AI 探索者</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">5</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/An3035"><i class="fab fa-github"></i><span>GitHub</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/An3035" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">记录 AI 开发与全栈学习笔记，持续更新中...</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89-Hexo"><span class="toc-number">1.</span> <span class="toc-text">为什么选 Hexo</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE%EF%BC%8C%E6%AF%94%E6%83%B3%E8%B1%A1%E7%9A%84%E9%A1%BA"><span class="toc-number">2.</span> <span class="toc-text">环境配置，比想象的顺</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E9%A2%98%E9%80%89%E4%BA%86-Butterfly"><span class="toc-number">3.</span> <span class="toc-text">主题选了 Butterfly</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95"><span class="toc-number">4.</span> <span class="toc-text">踩坑记录</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%91-1%EF%BC%9Atotalcount-is-not-a-function"><span class="toc-number">4.1.</span> <span class="toc-text">坑 1：totalcount is not a function</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%91-2%EF%BC%9A%E8%87%AA%E5%AE%9A%E4%B9%89-CSS-%E4%B8%8D%E7%94%9F%E6%95%88"><span class="toc-number">4.2.</span> <span class="toc-text">坑 2：自定义 CSS 不生效</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%91-3%EF%BC%9A%E9%83%A8%E7%BD%B2%E6%9D%83%E9%99%90"><span class="toc-number">4.3.</span> <span class="toc-text">坑 3：部署权限</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%89%8D%E8%A3%85%E4%BA%86%E7%9A%84%E6%8F%92%E4%BB%B6"><span class="toc-number">5.</span> <span class="toc-text">目前装了的插件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%A5%E5%B8%B8%E4%B8%89%E4%BB%B6%E5%A5%97"><span class="toc-number">6.</span> <span class="toc-text">日常三件套</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A5%E4%B8%8B%E6%9D%A5"><span class="toc-number">7.</span> <span class="toc-text">接下来</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/28/%E4%BB%8E%E6%8C%87%E4%BB%A4%E5%88%B0%E9%97%AD%E7%8E%AF%EF%BC%9A%E6%9E%84%E5%BB%BAAI%E5%8A%A9%E6%89%8B%E5%85%A8%E8%87%AA%E5%8A%A8%E6%8A%80%E8%83%BD%E7%94%9F%E6%80%81%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%AE%9E%E8%B7%B5%E4%B9%8B%E8%B7%AF/" title="从指令到闭环：构建AI助手全自动技能生态系统的实践之路">从指令到闭环：构建AI助手全自动技能生态系统的实践之路</a><time datetime="2026-05-28T08:38:56.000Z" title="发表于 2026-05-28 16:38:56">2026-05-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/28/An-Skills%E7%AE%A1%E7%90%86%E6%96%B9%E6%A1%88/" title="An_Skills管理方案">An_Skills管理方案</a><time datetime="2026-05-28T02:53:34.000Z" title="发表于 2026-05-28 10:53:34">2026-05-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/27/hexo-build-pitfalls/" title="Hexo 博客搭建踩坑记录">Hexo 博客搭建踩坑记录</a><time datetime="2026-05-27T13:20:00.000Z" title="发表于 2026-05-27 21:20:00">2026-05-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/27/my-first-hexo-blog/" title="我的第一个 Hexo 博客上线了">我的第一个 Hexo 博客上线了</a><time datetime="2026-05-27T13:04:00.000Z" title="发表于 2026-05-27 21:04:00">2026-05-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/27/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E6%8A%80%E6%9C%AF%E5%8D%9A%E5%AE%A2/" title="我的第一篇技术博客">我的第一篇技术博客</a><time datetime="2026-05-27T13:01:53.000Z" title="发表于 2026-05-27 21:01:53">2026-05-27</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By An</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.5-b1</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.5-b1"></script><script src="/js/main.js?v=5.5.5-b1"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.5-b1"></script></div></div></body></html>

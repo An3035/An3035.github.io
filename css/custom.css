@@ -1,0 +1,422 @@
+/* ============================================
+   Hexo Butterfly 深度美化 - 自定义样式
+   ============================================ */
+
+/* ===== 1. CSS 变量定义（科技蓝主色调） ===== */
+:root {
+  --primary: #4A90D9;
+  --primary-dark: #357ABD;
+  --primary-light: #A4D8FA;
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --card-shadow-hover: 0 8px 30px rgba(74, 144, 217, 0.18);
+  --code-bg: #1e1e2e;
+  --radius: 12px;
+  --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== 2. 文章卡片悬浮渐变效果 ===== */
+.recent-post-item,
+#article-container .recent-post-item,
+.relatedPosts > .relatedPosts-list > div {
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  transition: transform var(--transition), box-shadow var(--transition);
+  overflow: hidden;
+  background: #fff;
+}
+
+.recent-post-item:hover,
+.relatedPosts > .relatedPosts-list > div:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
+  background: linear-gradient(
+    135deg,
+    rgba(74, 144, 217, 0.03) 0%,
+    rgba(255, 255, 255, 1) 40%,
+    rgba(74, 144, 217, 0.05) 100%
+  );
+}
+
+.recent-post-item:hover .post-title a {
+  color: var(--primary-dark);
+}
+
+/* 卡片封面图圆角 */
+.recent-post-item .post_cover img {
+  border-radius: 8px;
+}
+
+/* ===== 3. 文章正文排版优化 ===== */
+#article-container {
+  font-size: 16px;
+  line-height: 1.85;
+  color: #2c3e50;
+  word-break: break-word;
+}
+
+#article-container p {
+  margin: 0 0 1.2em 0;
+  line-height: 1.9;
+}
+
+#article-container h1 { font-size: 2em; margin: 1.4em 0 0.8em; }
+#article-container h2 { font-size: 1.6em; margin: 1.3em 0 0.7em; }
+#article-container h3 { font-size: 1.35em; margin: 1.2em 0 0.6em; }
+#article-container h4,
+#article-container h5,
+#article-container h6 { font-size: 1.15em; margin: 1em 0 0.5em; }
+
+#article-container blockquote {
+  border-left: 4px solid var(--primary);
+  background: rgba(74, 144, 217, 0.04);
+  padding: 0.8em 1.2em;
+  border-radius: 0 8px 8px 0;
+  margin: 1.2em 0;
+  color: #555;
+}
+
+#article-container ul,
+#article-container ol {
+  padding-left: 1.6em;
+  margin: 0.8em 0 1.2em;
+}
+
+#article-container li {
+  line-height: 1.85;
+  margin: 0.3em 0;
+}
+
+#article-container img {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  max-width: 100%;
+}
+
+#article-container a {
+  color: var(--primary);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--transition), color var(--transition);
+}
+
+#article-container a:hover {
+  color: var(--primary-dark);
+  border-bottom-color: var(--primary);
+}
+
+/* ===== 4. 代码块美化 ===== */
+#article-container figure {
+  margin: 1.2em 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+#article-container figure .highlight,
+#article-container figure.highlight {
+  background: var(--code-bg);
+  border-radius: var(--radius);
+}
+
+/* 代码块顶部栏 */
+#article-container figure .highlight .caption {
+  background: #181825;
+  color: #cdd6f4;
+  padding: 0.6em 1.2em;
+  font-size: 13px;
+  border-bottom: 1px solid #313244;
+}
+
+/* 代码表格 */
+#article-container figure table {
+  margin: 0;
+  border: none;
+}
+
+/* 行号列 */
+#article-container figure .gutter {
+  background: #181825;
+  color: #585b70;
+  padding: 0.8em 0.6em 0.8em 1em;
+  border-right: 1px solid #313244;
+  user-select: none;
+  min-width: 2.5em;
+  text-align: right;
+  font-size: 13px;
+}
+
+/* 代码内容 */
+#article-container figure .code {
+  padding: 0.8em 1.2em;
+  font-size: 14px;
+  line-height: 1.65;
+  color: #cdd6f4;
+  background: var(--code-bg);
+}
+
+/* 代码选中颜色 */
+#article-container figure .code ::selection,
+#article-container figure pre ::selection {
+  background: rgba(74, 144, 217, 0.4);
+  color: #fff;
+}
+
+/* 行内代码 */
+#article-container code:not([class]) {
+  background: #f0f4f8;
+  color: var(--primary-dark);
+  padding: 0.15em 0.5em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  border: 1px solid rgba(74, 144, 217, 0.15);
+}
+
+/* 代码块滚动条 */
+#article-container figure .code::-webkit-scrollbar,
+#article-container figure pre::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+#article-container figure .code::-webkit-scrollbar-track,
+#article-container figure pre::-webkit-scrollbar-track {
+  background: #181825;
+  border-radius: 3px;
+}
+
+#article-container figure .code::-webkit-scrollbar-thumb,
+#article-container figure pre::-webkit-scrollbar-thumb {
+  background: #45475a;
+  border-radius: 3px;
+}
+
+#article-container figure .code::-webkit-scrollbar-thumb:hover,
+#article-container figure pre::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* ===== 5. 全局滚动条美化 ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c0c8d4;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* ===== 6. 移动端适配 ===== */
+@media screen and (max-width: 768px) {
+
+  /* 导航栏 */
+  #nav {
+    padding: 0 1em;
+  }
+
+  #nav .menus_items {
+    display: none;
+  }
+
+  #nav #sidebar_button {
+    display: flex;
+  }
+
+  /* 侧边栏移动端全屏 */
+  #sidebar {
+    width: 85vw;
+    max-width: 320px;
+  }
+
+  #sidebar.show {
+    transform: translateX(0);
+  }
+
+  /* 文章区域 */
+  #content-inner {
+    padding: 0 0.8em;
+  }
+
+  .layout {
+    padding: 0;
+  }
+
+  /* 文章卡片间距收紧 */
+  .recent-post-item {
+    margin-bottom: 1em;
+    border-radius: 10px;
+  }
+
+  /* 正文字号适配 */
+  #article-container {
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  #article-container h1 { font-size: 1.5em; }
+  #article-container h2 { font-size: 1.3em; }
+  #article-container h3 { font-size: 1.15em; }
+
+  /* 代码块移动端 */
+  #article-container figure .code {
+    font-size: 13px;
+    padding: 0.6em 0.8em;
+  }
+
+  #article-container figure .gutter {
+    padding: 0.6em 0.4em 0.6em 0.6em;
+    font-size: 12px;
+  }
+
+  /* 图片圆角缩减 */
+  #article-container img {
+    border-radius: 6px;
+  }
+}
+
+/* 小屏手机 */
+@media screen and (max-width: 480px) {
+  #content-inner {
+    padding: 0 0.5em;
+  }
+
+  #article-container {
+    font-size: 14.5px;
+  }
+
+  .recent-post-item {
+    border-radius: 8px;
+  }
+}
+
+/* ===== 7. 页脚美化 ===== */
+#footer-wrap {
+  padding: 2em 1em;
+  color: #888;
+  font-size: 13px;
+  line-height: 1.8;
+  border-top: 1px solid rgba(74, 144, 217, 0.12);
+  background: linear-gradient(
+    180deg,
+    rgba(74, 144, 217, 0.02) 0%,
+    transparent 100%
+  );
+}
+
+#footer-wrap a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+#footer-wrap a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+#footer-wrap .copyright {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 0.6em;
+  letter-spacing: 0.5px;
+}
+
+/* 页脚分隔符 */
+#footer-wrap .footer-separator {
+  margin: 0 0.5em;
+  color: #ccc;
+}
+
+/* 主题切换按钮随滚动条 */
+#rightside {
+  bottom: 40px;
+  z-index: 999;
+}
+
+/* ===== 8. 暗黑模式适配 ===== */
+[data-theme="dark"] {
+
+  /* 卡片 */
+  .recent-post-item,
+  .relatedPosts > .relatedPosts-list > div {
+    background: #1e1e2e;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .recent-post-item:hover,
+  .relatedPosts > .relatedPosts-list > div:hover {
+    box-shadow: 0 8px 30px rgba(74, 144, 217, 0.25);
+    background: linear-gradient(
+      135deg,
+      rgba(74, 144, 217, 0.08) 0%,
+      rgba(30, 30, 46, 1) 40%,
+      rgba(74, 144, 217, 0.06) 100%
+    );
+  }
+
+  /* 正文 */
+  #article-container {
+    color: #cdd6f4;
+  }
+
+  #article-container blockquote {
+    background: rgba(74, 144, 217, 0.08);
+    color: #bac2de;
+  }
+
+  /* 行内代码 */
+  #article-container code:not([class]) {
+    background: rgba(74, 144, 217, 0.12);
+    color: #89b4fa;
+    border-color: rgba(74, 144, 217, 0.2);
+  }
+
+  /* 图片 */
+  #article-container img {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  /* 滚动条 */
+  ::-webkit-scrollbar-track {
+    background: #181825;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #45475a;
+  }
+
+  /* 页脚 */
+  #footer-wrap {
+    border-top-color: rgba(74, 144, 217, 0.15);
+    color: #6c7086;
+    background: linear-gradient(
+      180deg,
+      rgba(74, 144, 217, 0.04) 0%,
+      transparent 100%
+    );
+  }
+
+  /* 代码块 */
+  #article-container figure {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* ===== 9. 头像缓慢旋转 ===== */
+.site-card .avatar-img,
+.avatar-img {
+  animation: avatar-rotate 8s linear infinite !important;
+}
+
+@keyframes avatar-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
