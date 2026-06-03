@@ -1,0 +1,22 @@
+name: Update README with Latest Posts
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '_posts/**/*.md'  # 你的文章存放目录
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      
+      - name: Update README
+        uses: jaywcjlove/github-action-readme@main
+        with:
+          file: README.md
+          placeholder: <!-- LATEST_POSTS -->
+          template: |
+            {% for post in posts | slice(0,3) %}
+            - [{{ post.title }}]({{ post.url }}) - {{ post.date | date('%Y-%m-%d') }}
+            {% endfor %}
