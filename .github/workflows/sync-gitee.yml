@@ -13,23 +13,28 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Configure Git
+      - name: Configure Git and Credentials
         run: |
           git config --global user.name "An3035"
           git config --global user.email "1613870384@qq.com"
-          git config --global credential.helper store
+          
+          # 关键：Gitee要求必须使用 用户名:令牌 格式，且需要URL编码
+          GITEE_AUTH="zhangan11:${{ secrets.GITEE_TOKEN }}"
+          # 对认证信息进行URL编码，处理特殊字符
+          GITEE_AUTH_ENCODED=$(echo -n "$GITEE_AUTH" | jq -sRr @uri)
+          
+          # 配置Git凭证助手，提前注入认证信息
+          git config --global credential.helper "store --file ~/.git-credentials"
+          echo "https://$GITEE_AUTH_ENCODED@gitee.com" > ~/.git-credentials
+          
+          # 验证凭证是否正确写入
+          cat ~/.git-credentials
 
       - name: Sync to Gitee
         run: |
-          # 验证令牌是否存在（调试用）
-          if [ -z "${{ secrets.GITEE_TOKEN }}" ]; then
-            echo "错误：GITEE_TOKEN 未配置"
-            exit 1
-          fi
+          # 添加Gitee远程仓库（不需要再带令牌，凭证已经提前配置）
+          git remote add gitee https://gitee.com/zhangan11/zhangan11.git
           
-          # 添加Gitee远程仓库（标准HTTPS令牌格式）
-          git remote set-url origin https://${{ secrets.GITEE_TOKEN }}@gitee.com/zhangan11/zhangan11.git
-          
-          # 强制推送所有内容
-          git push -f origin main
-          git push -f origin --tags
+          # 强制推送所有分支和标签
+          git push -f gitee --all
+          git push -f gitee --tags
