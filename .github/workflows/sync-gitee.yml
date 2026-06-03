@@ -2,7 +2,7 @@ name: Sync to Gitee
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:  # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   sync:
@@ -11,18 +11,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0  # 拉取完整提交历史
+          fetch-depth: 0
 
       - name: Configure Git
         run: |
           git config --global user.name "An3035"
           git config --global user.email "1613870384@qq.com"
+          git config --global credential.helper store
 
       - name: Sync to Gitee
         run: |
-          # 添加Gitee远程仓库（用HTTPS+令牌方式，不需要SSH）
-          git remote add gitee https://${{ secrets.GITEE_TOKEN }}@gitee.com/zhangan11/zhangan11.git
+          # 验证令牌是否存在（调试用）
+          if [ -z "${{ secrets.GITEE_TOKEN }}" ]; then
+            echo "错误：GITEE_TOKEN 未配置"
+            exit 1
+          fi
           
-          # 强制推送所有分支和标签到Gitee
-          git push -f gitee --all
-          git push -f gitee --tags
+          # 添加Gitee远程仓库（标准HTTPS令牌格式）
+          git remote set-url origin https://${{ secrets.GITEE_TOKEN }}@gitee.com/zhangan11/zhangan11.git
+          
+          # 强制推送所有内容
+          git push -f origin main
+          git push -f origin --tags
