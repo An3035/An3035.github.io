@@ -2,7 +2,7 @@ name: Sync to Gitee
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
+  workflow_dispatch:  # 允许手动触发
 
 jobs:
   sync:
@@ -11,16 +11,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # 拉取完整提交历史
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "An3035"
+          git config --global user.email "1613870384@qq.com"
 
       - name: Sync to Gitee
-        uses: Yikun/hub-mirror-action@master
-        with:
-          src: github/An3035
-          dst: gitee/zhangan11
-          dst_name: zhangan11  # 关键：指定Gitee目标仓库名（和你的Gitee用户名一致）
-          static_list: "An3035.github.io"
-          dst_token: ${{ secrets.GITEE_TOKEN }}
-          clone_style: https  # 关键：强制用HTTPS方式认证，不用SSH
-          force_update: true
-          debug: true
+        run: |
+          # 添加Gitee远程仓库（用HTTPS+令牌方式，不需要SSH）
+          git remote add gitee https://${{ secrets.GITEE_TOKEN }}@gitee.com/zhangan11/zhangan11.git
+          
+          # 强制推送所有分支和标签到Gitee
+          git push -f gitee --all
+          git push -f gitee --tags
