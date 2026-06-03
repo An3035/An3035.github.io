@@ -2,23 +2,23 @@ name: Sync to Gitee
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
+  workflow_dispatch:  # 允许手动触发
+
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5  # 已升级到支持 Node.js 24 的版本
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # 拉取完整提交历史
 
       - name: Sync to Gitee
         uses: Yikun/hub-mirror-action@master
         with:
-          src: github/An3035  # 你的GitHub用户名
-          dst: gitee/zhangan11  # 你的Gitee用户名（已修正）
-          static_list: "An3035.github.io"  # 你的GitHub仓库名
-          dst_key: ${{ secrets.GITEE_TOKEN }}
-          dst_token: ${{ secrets.GITEE_TOKEN }}
+          src: github/An3035  # 你的 GitHub 用户名
+          dst: gitee/zhangan11  # 你的 Gitee 用户名（已修正）
+          static_list: "An3035.github.io"  # 你的 GitHub 仓库名
+          dst_token: ${{ secrets.GITEE_TOKEN }}  # 只保留 dst_token 即可，更兼容最新版本
           force_update: true
-          debug: true
+          debug: true  # 开启调试，方便看详细错误
