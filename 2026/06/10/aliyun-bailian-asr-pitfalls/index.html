@@ -1,0 +1,473 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>阿里云百炼新平台语音识别踩坑全记录：从连续失败到成功的避坑指南 | An3035的技术小屋</title><meta name="author" content="An"><meta name="copyright" content="An"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="一句话总结：控制台能跑 ≠ 你后端能跑。前端 WebM 录音 → 百炼新平台识别，中间隔着格式、模型、SDK 三座大山，爬过去你就赢了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="阿里云百炼新平台语音识别踩坑全记录：从连续失败到成功的避坑指南">
+<meta property="og:url" content="https://an3035.github.io/2026/06/10/aliyun-bailian-asr-pitfalls/index.html">
+<meta property="og:site_name" content="An3035的技术小屋">
+<meta property="og:description" content="一句话总结：控制台能跑 ≠ 你后端能跑。前端 WebM 录音 → 百炼新平台识别，中间隔着格式、模型、SDK 三座大山，爬过去你就赢了。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://avatars.githubusercontent.com/An3035">
+<meta property="article:published_time" content="2026-06-10T14:30:00.000Z">
+<meta property="article:modified_time" content="2026-06-10T14:23:42.222Z">
+<meta property="article:author" content="An">
+<meta property="article:tag" content="FastAPI">
+<meta property="article:tag" content="WebM转码">
+<meta property="article:tag" content="ffmpeg">
+<meta property="article:tag" content="fun-asr">
+<meta property="article:tag" content="语音识别">
+<meta property="article:tag" content="踩坑记录">
+<meta property="article:tag" content="阿里云百炼">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://avatars.githubusercontent.com/An3035"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "阿里云百炼新平台语音识别踩坑全记录：从连续失败到成功的避坑指南",
+  "url": "https://an3035.github.io/2026/06/10/aliyun-bailian-asr-pitfalls/",
+  "image": "https://avatars.githubusercontent.com/An3035",
+  "datePublished": "2026-06-10T14:30:00.000Z",
+  "dateModified": "2026-06-10T14:23:42.222Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "An",
+      "url": "https://an3035.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://an3035.github.io/2026/06/10/aliyun-bailian-asr-pitfalls/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.5-b1"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '阿里云百炼新平台语音识别踩坑全记录：从连续失败到成功的避坑指南',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css?v=5"><script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://avatars.githubusercontent.com/An3035" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">8</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">31</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/guestbook/"><i class="fa-fw fa fa-book"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于我</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">An3035的技术小屋</span></a><a class="nav-page-title" href="/"><span class="site-name">阿里云百炼新平台语音识别踩坑全记录：从连续失败到成功的避坑指南</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/guestbook/"><i class="fa-fw fa fa-book"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于我</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">阿里云百炼新平台语音识别踩坑全记录：从连续失败到成功的避坑指南</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-10T14:30:00.000Z" title="发表于 2026-06-10 22:30:00">2026-06-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-10T14:23:42.222Z" title="更新于 2026-06-10 22:23:42">2026-06-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%8D%9A%E5%AE%A2/">技术博客</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">3.2k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>12分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>一句话总结：控制台能跑 ≠ 你后端能跑。前端 WebM 录音 → 百炼新平台识别，中间隔着格式、模型、SDK 三座大山，爬过去你就赢了。</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="前言：一周的崩溃，差点把键盘砸了"><a href="#前言：一周的崩溃，差点把键盘砸了" class="headerlink" title="前言：一周的崩溃，差点把键盘砸了"></a>前言：一周的崩溃，差点把键盘砸了</h2><p>做 HIS 系统开发这么多年，自认为各种第三方服务接入也算轻车熟路了。结果在阿里云百炼的新平台上搞语音识别，整整踩了一周的坑——从 “这不就是个 API 调用吗” 到 “这玩意儿到底能不能用” 的心态转变，只用了两天。</p>
+<p>最让人崩溃的是什么？<strong>控制台上传同一个 WebM 文件，用 fun-asr 模型能正常识别，返回结果清清楚楚。</strong> 然后我信心满满地把同一个文件塞给后端接口——失败、失败、还是失败。</p>
+<p>每次看到控制台那个绿色的识别结果，再看看自己终端里红色的报错，就一个感觉：<strong>它在嘲讽我。</strong></p>
+<p>这篇文章记录了我从 Transcription 异步转写到 Recognition 实时流，从自己拼 HTTP 请求到最终靠 ffmpeg 转码 + SDK 正确调用，一步步踩坑、一步步破案的全过程。如果你也在用 FastAPI + 阿里云百炼做语音识别，希望能帮你少踩几个坑。</p>
+<hr>
+<h2 id="一、先搞懂：为什么控制台能跑，我后端跑不通？"><a href="#一、先搞懂：为什么控制台能跑，我后端跑不通？" class="headerlink" title="一、先搞懂：为什么控制台能跑，我后端跑不通？"></a>一、先搞懂：为什么控制台能跑，我后端跑不通？</h2><h3 id="核心问题：格式-模型-SDK-三者不匹配"><a href="#核心问题：格式-模型-SDK-三者不匹配" class="headerlink" title="核心问题：格式 &#x2F; 模型 &#x2F; SDK 三者不匹配"></a>核心问题：格式 &#x2F; 模型 &#x2F; SDK 三者不匹配</h3><p>控制台看起来简单——上传文件，点一下，出结果。但它在底层偷偷帮你做了很多事：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">控制台底层流程：</span><br><span class="line">WebM 音频 → 自动转码（WAV/PCM 16kHz）→ 上传到内部 OSS → 调用识别服务 → 返回结果</span><br></pre></td></tr></table></figure>
+
+<p>而我一开始的链路是这样的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">我的链路（错误版本）：</span><br><span class="line">WebM 音频 → 直接塞给 API → ❌ 格式不支持</span><br></pre></td></tr></table></figure>
+
+<p><strong>控制台上传 WebM 能识别，是因为它帮你转了码，不是因为它支持 WebM。</strong> 这个认知偏差，是我踩掉所有坑的根源。</p>
+<p>整个问题的本质其实就是一张匹配表：</p>
+<table>
+<thead>
+<tr>
+<th>环节</th>
+<th>你的输入</th>
+<th>百炼需要什么</th>
+<th>匹配吗？</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>音频格式</td>
+<td>WebM (Opus)</td>
+<td>WAV &#x2F; PCM 16kHz 单声道</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>调用方式</td>
+<td>自己拼 HTTP &#x2F; Transcription 类</td>
+<td>Recognition 类（新平台）</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>模型名称</td>
+<td><code>fun-asr</code></td>
+<td><code>fun-asr-realtime</code></td>
+<td>❌</td>
+</tr>
+</tbody></table>
+<p>三个关键环节，我一个都没对上。下面按时间顺序复盘每一个坑。</p>
+<hr>
+<h2 id="二、我踩过的所有坑（按顺序复盘）"><a href="#二、我踩过的所有坑（按顺序复盘）" class="headerlink" title="二、我踩过的所有坑（按顺序复盘）"></a>二、我踩过的所有坑（按顺序复盘）</h2><h3 id="坑1：Transcription-OSS-上传，FILE-403-FORBIDDEN"><a href="#坑1：Transcription-OSS-上传，FILE-403-FORBIDDEN" class="headerlink" title="坑1：Transcription + OSS 上传，FILE_403_FORBIDDEN"></a>坑1：Transcription + OSS 上传，FILE_403_FORBIDDEN</h3><p><strong>症状：</strong></p>
+<p>一开始我看文档，发现有 <code>Transcription</code> 类，想着异步转写正好，传个文件 URL 过去慢慢等结果就行。配合 <code>OSSUtils.upload</code> 把文件传到 OSS，拿到 URL 传给 Transcription API。</p>
+<p>然后开始了漫长的等待——任务状态永远是 <code>PENDING</code>，过了几分钟变成 <code>FAILED</code>。错误信息先是 <code>FILE_403_FORBIDDEN</code>，后来又冒出 <code>SERVER_ERROR</code>。</p>
+<p><strong>根因：</strong></p>
+<p>两个问题叠在一起：</p>
+<ol>
+<li><strong>权限问题：</strong> <code>OSSUtils.upload</code> 上传的文件默认是<strong>私有权限</strong>，百炼的服务账号根本没有权限读取你这个文件。API 拿到 URL 去下载，直接 403。</li>
+<li><strong>平台兼容问题：</strong> 更关键的是，<code>Transcription</code> 类是<strong>旧平台</strong>的异步转写方案，和新百炼平台的权限体系、模型体系根本不兼容。你就算把文件设成公开读，它也不一定能正常跑。</li>
+</ol>
+<p><strong>教训：</strong></p>
+<p>在百炼<strong>新平台</strong>上，别碰 <code>Transcription</code> 类和 <code>OSSUtils.upload</code> 这套组合拳。这条路是死胡同，官方文档里也没有明确告诉你”新平台请用 Recognition”，我是踩完了才发现。</p>
+<hr>
+<h3 id="坑2：自己拼-HTTP-POST-请求，URL-和格式全错"><a href="#坑2：自己拼-HTTP-POST-请求，URL-和格式全错" class="headerlink" title="坑2：自己拼 HTTP POST 请求，URL 和格式全错"></a>坑2：自己拼 HTTP POST 请求，URL 和格式全错</h3><p><strong>症状：</strong></p>
+<p>既然 SDK 的 Transcription 不行，那我就直接拼 HTTP 请求——反正就是个 POST 嘛，我自己拼 body，Base64 传音频，总不会有问题吧？</p>
+<p>结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">url error: ...</span><br><span class="line">InvalidParameter: ...</span><br><span class="line">task can not be null</span><br></pre></td></tr></table></figure>
+
+<p>换了 N 个 API 地址，改了 N 版请求体，永远是这几个错误在轮播。</p>
+<p><strong>根因：</strong></p>
+<ol>
+<li><strong>API 地址一直在变：</strong> 新平台刚上线不久，API 地址迭代很快。网上的教程、博客里的地址基本都是旧的，贴进去直接 <code>url error</code>。</li>
+<li><strong>fun-asr 的入参格式和其他模型不一样：</strong> 百炼有好多模型（Paraformer、Whisper、fun-asr 等等），每个模型的请求体格式都有差异。我照着某个通用文档拼的 body，塞给 fun-asr 模型，格式根本对不上。</li>
+<li><strong>Signature 鉴权自己算也容易出错：</strong> SDK 帮你处理好了鉴权，自己拼请求还得手算签名，一个不小心就错。</li>
+</ol>
+<p><strong>教训：</strong></p>
+<p>不要自己拼 HTTP 请求。新平台老老实实用 SDK，SDK 内部就是 WebSocket 流式发送，和控制台的底层链路一致。你拼半天，人家 SDK 一行 <code>call()</code> 就搞定了。</p>
+<hr>
+<h3 id="坑3：Recognition-类用错模型，ModelNotFound"><a href="#坑3：Recognition-类用错模型，ModelNotFound" class="headerlink" title="坑3：Recognition 类用错模型，ModelNotFound"></a>坑3：Recognition 类用错模型，ModelNotFound</h3><p><strong>症状：</strong></p>
+<p>痛定思痛，决定彻底拥抱 SDK。查到 <code>Recognition</code> 类可以处理文件转写，赶紧试：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">recognition = Recognition(</span><br><span class="line">    model=<span class="string">&quot;fun-asr&quot;</span>,  <span class="comment"># 控制台看到的就是这个模型名！</span></span><br><span class="line">    ...</span><br><span class="line">)</span><br><span class="line">result = recognition.call(<span class="string">&quot;my_audio.webm&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>报错：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ModelNotFound: fun-asr</span><br></pre></td></tr></table></figure>
+
+<p>我整个人傻了——控制台上明明就是这个模型名啊？难不成模型还会隐身？</p>
+<p><strong>根因：</strong></p>
+<p><code>Recognition</code> 类有两种工作模式：</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>支持模型</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>实时流模式</td>
+<td><code>fun-asr-realtime</code>、<code>paraformer-realtime-v2</code> 等</td>
+<td>真正的实时语音识别，WebSocket 流式推送</td>
+</tr>
+<tr>
+<td>文件模式</td>
+<td><code>fun-asr-realtime</code> 等 realtime 系列</td>
+<td>用 WebSocket 模拟文件流式发送，实现文件转写</td>
+</tr>
+</tbody></table>
+<p>两个模式<strong>都只支持带 <code>-realtime</code> 后缀的模型</strong>。<code>fun-asr</code> 这个模型名是控制台文件上传测试时用的（底层也被转成了实时模型调用），但 SDK 的 Recognition 类不认识它，必须用 <code>fun-asr-realtime</code>。</p>
+<p><strong>教训：</strong></p>
+<p>SDK 里的模型名和控制台显示的模型名是两回事。Recognition 类请认准 <code>fun-asr-realtime</code>，不要直接照抄控制台上的名字。</p>
+<hr>
+<h3 id="坑4：Windows-下-ffmpeg-转码，异步子进程报错"><a href="#坑4：Windows-下-ffmpeg-转码，异步子进程报错" class="headerlink" title="坑4：Windows 下 ffmpeg 转码，异步子进程报错"></a>坑4：Windows 下 ffmpeg 转码，异步子进程报错</h3><p><strong>症状：</strong></p>
+<p>模型名改对了，文件传上去，心想这次总该行了吧？</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Error: Audio format not supported</span><br></pre></td></tr></table></figure>
+
+<p>好家伙，终于到了最后一个坑——<strong>格式问题</strong>。前端的 <code>MediaRecorder</code> 录出来的 WebM（Opus 编码），<code>fun-asr-realtime</code> 根本不支持。必须转成 WAV&#x2F;PCM 16kHz 格式。</p>
+<p>于是上了 ffmpeg：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -i input.webm -acodec pcm_s16le -ar 16000 -ac 1 -y output.wav</span><br></pre></td></tr></table></figure>
+
+<p>命令行手动跑，完美。用 Python 的 <code>asyncio.create_subprocess_exec</code> 调，<strong>挂了</strong>。</p>
+<p><strong>根因：</strong></p>
+<p>Windows 下用 <code>asyncio.create_subprocess_exec</code> 调用 ffmpeg，有几个坑：</p>
+<ol>
+<li><strong>路径问题：</strong> ffmpeg 可能不在系统 PATH 里，或者 Python 子进程继承的环境变量和你的终端不一样。</li>
+<li><strong>Windows 的 ProactorEventLoop 对子进程的支持问题：</strong> 在 Windows 上，asyncio 默认的事件循环策略 <code>WindowsProactorEventLoopPolicy</code> 对 <code>create_subprocess_exec</code> 的 pipe 处理有坑，可能导致进程卡死或者报 <code>NotImplementedError</code>。</li>
+<li><strong>大文件处理：</strong> 音频文件稍微大一点，stdout&#x2F;stderr 的 pipe 缓冲区满了，子进程直接卡住。</li>
+</ol>
+<p>解决方法是<strong>不用 asyncio 子进程</strong>，改成 <code>subprocess.run</code> 同步执行，反正转码本身就几秒钟的事，用 <code>run_in_executor</code> 丢到线程池里就行，别跟 asyncio 子进程较劲。</p>
+<hr>
+<h2 id="三、最终成功的完整方案"><a href="#三、最终成功的完整方案" class="headerlink" title="三、最终成功的完整方案"></a>三、最终成功的完整方案</h2><h3 id="架构总览"><a href="#架构总览" class="headerlink" title="架构总览"></a>架构总览</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">前端 MediaRecorder → WebM Blob → POST /api/speech-to-text</span><br><span class="line">                                    ↓</span><br><span class="line">后端 FastAPI → 保存临时文件 → ffmpeg 转码 → Recognition 调用 → 清理临时文件 → 返回文本</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-ffmpeg-转码逻辑（WebM-→-WAV-PCM-16kHz）"><a href="#1-ffmpeg-转码逻辑（WebM-→-WAV-PCM-16kHz）" class="headerlink" title="1. ffmpeg 转码逻辑（WebM → WAV&#x2F;PCM 16kHz）"></a>1. ffmpeg 转码逻辑（WebM → WAV&#x2F;PCM 16kHz）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"><span class="keyword">import</span> tempfile</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">convert_webm_to_wav</span>(<span class="params">webm_path: <span class="built_in">str</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    将 WebM 音频转码为 WAV/PCM 16kHz 单声道。</span></span><br><span class="line"><span class="string">    使用 subprocess.run 同步执行，避免 Windows 下 asyncio 子进程的坑。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        webm_path: 输入 WebM 文件路径</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        输出 WAV 文件路径</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Raises:</span></span><br><span class="line"><span class="string">        RuntimeError: ffmpeg 转码失败</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    wav_path = webm_path.rsplit(<span class="string">&quot;.&quot;</span>, <span class="number">1</span>)[<span class="number">0</span>] + <span class="string">&quot;.wav&quot;</span></span><br><span class="line"></span><br><span class="line">    cmd = [</span><br><span class="line">        <span class="string">&quot;ffmpeg&quot;</span>,</span><br><span class="line">        <span class="string">&quot;-i&quot;</span>, webm_path,</span><br><span class="line">        <span class="string">&quot;-acodec&quot;</span>, <span class="string">&quot;pcm_s16le&quot;</span>,   <span class="comment"># PCM 16-bit 小端</span></span><br><span class="line">        <span class="string">&quot;-ar&quot;</span>, <span class="string">&quot;16000&quot;</span>,            <span class="comment"># 采样率 16000 Hz</span></span><br><span class="line">        <span class="string">&quot;-ac&quot;</span>, <span class="string">&quot;1&quot;</span>,                <span class="comment"># 单声道</span></span><br><span class="line">        <span class="string">&quot;-y&quot;</span>,                      <span class="comment"># 覆盖已存在的输出文件</span></span><br><span class="line">        wav_path,</span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line">    result = subprocess.run(cmd, capture_output=<span class="literal">True</span>, text=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> result.returncode != <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">raise</span> RuntimeError(</span><br><span class="line">            <span class="string">f&quot;ffmpeg 转码失败: <span class="subst">&#123;result.stderr&#125;</span>&quot;</span></span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> wav_path</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-Recognition-类正确调用-fun-asr-realtime-模型"><a href="#2-Recognition-类正确调用-fun-asr-realtime-模型" class="headerlink" title="2. Recognition 类正确调用 fun-asr-realtime 模型"></a>2. Recognition 类正确调用 fun-asr-realtime 模型</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> dashscope.audio.asr <span class="keyword">import</span> Recognition, RecognitionResult</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">recognize_audio</span>(<span class="params">wav_path: <span class="built_in">str</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    调用百炼新平台 Recognition 类，用 fun-asr-realtime 模型识别音频。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        wav_path: WAV/PCM 16kHz 单声道音频文件路径</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        识别出的完整文本</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Raises:</span></span><br><span class="line"><span class="string">        RuntimeError: 识别失败</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 确保 API Key 已设置（从环境变量读取）</span></span><br><span class="line">    api_key = os.getenv(<span class="string">&quot;DASHSCOPE_API_KEY&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> api_key:</span><br><span class="line">        <span class="keyword">raise</span> RuntimeError(<span class="string">&quot;请设置环境变量 DASHSCOPE_API_KEY&quot;</span>)</span><br><span class="line"></span><br><span class="line">    recognition = Recognition(</span><br><span class="line">        model=<span class="string">&quot;fun-asr-realtime&quot;</span>,  <span class="comment"># 注意：必须带 -realtime 后缀！</span></span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    result: RecognitionResult = recognition.call(wav_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> result.get_sentence() <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">raise</span> RuntimeError(<span class="string">f&quot;识别失败: <span class="subst">&#123;result.get_last_error()&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 获取完整识别文本</span></span><br><span class="line">    text = result.get_sentence().get_text()</span><br><span class="line">    <span class="keyword">return</span> text</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-完整的-FastAPI-接口"><a href="#3-完整的-FastAPI-接口" class="headerlink" title="3. 完整的 FastAPI 接口"></a>3. 完整的 FastAPI 接口</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> uuid</span><br><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"><span class="keyword">import</span> tempfile</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> contextlib <span class="keyword">import</span> asynccontextmanager</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI, UploadFile, File, HTTPException</span><br><span class="line"><span class="keyword">from</span> pydantic <span class="keyword">import</span> BaseModel</span><br><span class="line"></span><br><span class="line">logging.basicConfig(level=logging.INFO)</span><br><span class="line">logger = logging.getLogger(__name__)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ---------- 响应模型 ----------</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">STTResponse</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    success: <span class="built_in">bool</span></span><br><span class="line">    text: <span class="built_in">str</span> | <span class="literal">None</span> = <span class="literal">None</span></span><br><span class="line">    error: <span class="built_in">str</span> | <span class="literal">None</span> = <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ---------- FastAPI 应用 ----------</span></span><br><span class="line">app = FastAPI(title=<span class="string">&quot;语音识别服务&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.post(<span class="params"><span class="string">&quot;/api/speech-to-text&quot;</span>, response_model=STTResponse</span>)</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">speech_to_text</span>(<span class="params">file: UploadFile = File(<span class="params">...</span>)</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    接收前端 WebM 音频，转码后调用百炼识别，返回文本。</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    tmp_webm = <span class="literal">None</span></span><br><span class="line">    tmp_wav = <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># 1. 校验文件类型</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> file.filename <span class="keyword">or</span> <span class="keyword">not</span> file.filename.endswith(<span class="string">&quot;.webm&quot;</span>):</span><br><span class="line">            <span class="keyword">raise</span> HTTPException(</span><br><span class="line">                status_code=<span class="number">400</span>,</span><br><span class="line">                detail=<span class="string">&quot;仅支持 WebM 格式音频&quot;</span>,</span><br><span class="line">            )</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 2. 保存上传的 WebM 到临时文件</span></span><br><span class="line">        suffix = <span class="string">&quot;.webm&quot;</span></span><br><span class="line">        <span class="keyword">with</span> tempfile.NamedTemporaryFile(</span><br><span class="line">            delete=<span class="literal">False</span>, suffix=suffix</span><br><span class="line">        ) <span class="keyword">as</span> f:</span><br><span class="line">            content = <span class="keyword">await</span> file.read()</span><br><span class="line">            f.write(content)</span><br><span class="line">            tmp_webm = f.name</span><br><span class="line"></span><br><span class="line">        logger.info(<span class="string">f&quot;收到音频文件: <span class="subst">&#123;file.filename&#125;</span>, 大小: <span class="subst">&#123;<span class="built_in">len</span>(content)&#125;</span> bytes&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 3. ffmpeg 转码（丢到线程池避免阻塞事件循环）</span></span><br><span class="line">        <span class="keyword">import</span> asyncio</span><br><span class="line">        <span class="keyword">from</span> functools <span class="keyword">import</span> partial</span><br><span class="line"></span><br><span class="line">        loop = asyncio.get_running_loop()</span><br><span class="line">        wav_path = <span class="keyword">await</span> loop.run_in_executor(</span><br><span class="line">            <span class="literal">None</span>, partial(convert_webm_to_wav, tmp_webm)</span><br><span class="line">        )</span><br><span class="line">        tmp_wav = wav_path</span><br><span class="line">        logger.info(<span class="string">f&quot;转码完成: <span class="subst">&#123;wav_path&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 4. 调用百炼识别</span></span><br><span class="line">        text = <span class="keyword">await</span> loop.run_in_executor(</span><br><span class="line">            <span class="literal">None</span>, partial(recognize_audio, wav_path)</span><br><span class="line">        )</span><br><span class="line">        logger.info(<span class="string">f&quot;识别结果: <span class="subst">&#123;text&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> STTResponse(success=<span class="literal">True</span>, text=text)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">except</span> HTTPException:</span><br><span class="line">        <span class="keyword">raise</span></span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        logger.exception(<span class="string">&quot;语音识别流程异常&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> STTResponse(success=<span class="literal">False</span>, error=<span class="built_in">str</span>(e))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        <span class="comment"># 5. 清理临时文件</span></span><br><span class="line">        <span class="keyword">for</span> tmp_file <span class="keyword">in</span> (tmp_webm, tmp_wav):</span><br><span class="line">            <span class="keyword">if</span> tmp_file <span class="keyword">and</span> os.path.exists(tmp_file):</span><br><span class="line">                <span class="keyword">try</span>:</span><br><span class="line">                    os.unlink(tmp_file)</span><br><span class="line">                <span class="keyword">except</span> OSError:</span><br><span class="line">                    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">pip install dashscope fastapi uvicorn python-multipart</span><br><span class="line"></span><br><span class="line"><span class="comment"># Windows 上安装 ffmpeg（用 winget 或 chocolatey）</span></span><br><span class="line">winget install ffmpeg</span><br><span class="line"><span class="comment"># 或</span></span><br><span class="line">choco install ffmpeg</span><br></pre></td></tr></table></figure>
+
+<h3 id="启动服务"><a href="#启动服务" class="headerlink" title="启动服务"></a>启动服务</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uvicorn main:app --reload --host 0.0.0.0 --port 8000</span><br></pre></td></tr></table></figure>
+
+<p>前端只需用 <code>MediaRecorder</code> 录好 WebM，<code>fetch</code> 发一个 FormData 过来就行：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> formData = <span class="keyword">new</span> <span class="title class_">FormData</span>();</span><br><span class="line">formData.<span class="title function_">append</span>(<span class="string">&quot;file&quot;</span>, webmBlob, <span class="string">&quot;recording.webm&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> res = <span class="keyword">await</span> <span class="title function_">fetch</span>(<span class="string">&quot;/api/speech-to-text&quot;</span>, &#123;</span><br><span class="line">    <span class="attr">method</span>: <span class="string">&quot;POST&quot;</span>,</span><br><span class="line">    <span class="attr">body</span>: formData,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> data = <span class="keyword">await</span> res.<span class="title function_">json</span>();</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(data.<span class="property">text</span>); <span class="comment">// &quot;喂，你好，你是谁？&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>听到那句 <strong>「喂，你好，你是谁？」</strong> 从终端打印出来的时候，我差点哭出来。一周的坑，终于走通了。</p>
+<hr>
+<h2 id="四、避坑总结（干货，抄作业用）"><a href="#四、避坑总结（干货，抄作业用）" class="headerlink" title="四、避坑总结（干货，抄作业用）"></a>四、避坑总结（干货，抄作业用）</h2><h3 id="1-格式-模型-SDK-严格匹配表"><a href="#1-格式-模型-SDK-严格匹配表" class="headerlink" title="1. 格式 &#x2F; 模型 &#x2F; SDK 严格匹配表"></a>1. 格式 &#x2F; 模型 &#x2F; SDK 严格匹配表</h3><table>
+<thead>
+<tr>
+<th>你的场景</th>
+<th>前端格式</th>
+<th>需要转码？</th>
+<th>用哪个 SDK 类？</th>
+<th>模型名</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>浏览器录音 → 识别</td>
+<td>WebM (Opus)</td>
+<td>✅ 必须转 WAV&#x2F;PCM 16kHz</td>
+<td><code>Recognition</code></td>
+<td><code>fun-asr-realtime</code></td>
+</tr>
+<tr>
+<td>已有 WAV 文件 → 识别</td>
+<td>WAV&#x2F;PCM 16kHz</td>
+<td>❌</td>
+<td><code>Recognition</code></td>
+<td><code>fun-asr-realtime</code></td>
+</tr>
+<tr>
+<td>实时麦克风流 → 识别</td>
+<td>PCM 流</td>
+<td>❌</td>
+<td><code>Recognition</code> (实时流模式)</td>
+<td><code>fun-asr-realtime</code></td>
+</tr>
+</tbody></table>
+<h3 id="2-前端-WebM-必须转码，别指望模型直接吃"><a href="#2-前端-WebM-必须转码，别指望模型直接吃" class="headerlink" title="2. 前端 WebM 必须转码，别指望模型直接吃"></a>2. 前端 WebM 必须转码，别指望模型直接吃</h3><p>前端的 <code>MediaRecorder</code> 产出的 WebM（Opus 编码），百炼的实时模型<strong>不直接支持</strong>。控制台上传 WebM 能识别是因为它偷偷帮你转了码。你的后端必须自己做这一步。</p>
+<p>转码参数记住这组 “黄金配置”：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -i input.webm -acodec pcm_s16le -ar 16000 -ac 1 -y output.wav</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>pcm_s16le</code>：16-bit PCM，小端序</li>
+<li><code>-ar 16000</code>：16kHz 采样率</li>
+<li><code>-ac 1</code>：单声道</li>
+</ul>
+<h3 id="3-Windows-下-ffmpeg-转码的正确姿势"><a href="#3-Windows-下-ffmpeg-转码的正确姿势" class="headerlink" title="3. Windows 下 ffmpeg 转码的正确姿势"></a>3. Windows 下 ffmpeg 转码的正确姿势</h3><ul>
+<li><strong>不要用 <code>asyncio.create_subprocess_exec</code></strong>，用 <code>subprocess.run</code> + <code>loop.run_in_executor</code></li>
+<li><strong>确保 ffmpeg 在 PATH 里</strong>，或者用绝对路径</li>
+<li><strong>不要忘记 <code>-y</code> 参数</strong>，否则输出文件已存在时 ffmpeg 会交互式询问，进程直接挂起</li>
+</ul>
+<h3 id="4-百炼新平台-SDK-使用速查"><a href="#4-百炼新平台-SDK-使用速查" class="headerlink" title="4. 百炼新平台 SDK 使用速查"></a>4. 百炼新平台 SDK 使用速查</h3><table>
+<thead>
+<tr>
+<th>需求</th>
+<th>类</th>
+<th>关键参数</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>音频文件转文字</td>
+<td><code>dashscope.audio.asr.Recognition</code></td>
+<td><code>model=&quot;fun-asr-realtime&quot;</code></td>
+<td>文件模式，SDK 内部 WebSocket 流式发送</td>
+</tr>
+<tr>
+<td>实时麦克风转文字</td>
+<td><code>dashscope.audio.asr.Recognition</code></td>
+<td><code>model=&quot;fun-asr-realtime&quot;</code></td>
+<td>实时流模式，传 PCM 数据</td>
+</tr>
+<tr>
+<td><del>异步转写</del></td>
+<td><del><code>dashscope.audio.asr.Transcription</code></del></td>
+<td>—</td>
+<td><strong>新平台别用</strong>，不兼容</td>
+</tr>
+</tbody></table>
+<h3 id="5-心态避坑"><a href="#5-心态避坑" class="headerlink" title="5. 心态避坑"></a>5. 心态避坑</h3><blockquote>
+<p>控制台能跑 ≠ 后端能跑。</p>
+</blockquote>
+<p>控制台是”演示模式”，很多脏活累活（转码、格式转换、权限处理）它帮你做掉了。你后端调 API 是”生产模式”，每个环节都得自己兜。</p>
+<hr>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>如果你也在做 HIS 系统或者类似的医疗信息化产品，大概率跟我一样——后端 Java&#x2F;Python 一把梭，前端能跑就行，语音识别这种”看起来调个 API 就行”的东西，实际落地却一堆坑。</p>
+<p>希望这篇文章能帮你少走弯路。起码下次你在百炼控制台看到识别结果正常、后端却报错的时候，能想起这篇文章，而不是像我一样对着屏幕怀疑人生。</p>
+<p>最后附上我的博客链接：</p>
+<ul>
+<li>🌍 国外访问（GitHub Pages）：<a href="https://an3035.github.io/">https://an3035.github.io/</a></li>
+<li>🇨🇳 国内访问（Cloudflare Pages，无代理可访问）：<a target="_blank" rel="noopener" href="https://an-96x.pages.dev/">https://an-96x.pages.dev</a></li>
+</ul>
+<p>欢迎来踩，一起吐槽。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://an3035.github.io">An</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://an3035.github.io/2026/06/10/aliyun-bailian-asr-pitfalls/">https://an3035.github.io/2026/06/10/aliyun-bailian-asr-pitfalls/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://an3035.github.io" target="_blank">An3035的技术小屋</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/FastAPI/">FastAPI</a><a class="post-meta__tags" href="/tags/%E9%98%BF%E9%87%8C%E4%BA%91%E7%99%BE%E7%82%BC/">阿里云百炼</a><a class="post-meta__tags" href="/tags/%E8%AF%AD%E9%9F%B3%E8%AF%86%E5%88%AB/">语音识别</a><a class="post-meta__tags" href="/tags/%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/">踩坑记录</a><a class="post-meta__tags" href="/tags/ffmpeg/">ffmpeg</a><a class="post-meta__tags" href="/tags/fun-asr/">fun-asr</a><a class="post-meta__tags" href="/tags/WebM%E8%BD%AC%E7%A0%81/">WebM转码</a></div><div class="post-share"><div class="social-share" data-image="https://avatars.githubusercontent.com/An3035" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/06/06/claude-code-skill-system-recovery/" title="Claude Code技能系统重装恢复：插件下架反而让我的架构更强大了"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Claude Code技能系统重装恢复：插件下架反而让我的架构更强大了</div></div><div class="info-2"><div class="info-item-1">Claude Code技能系统重装恢复：插件下架反而让我的架构更强大了一、背景就在前几天，我重装了 Claude Code CLI。本以为只是简单的环境重建，没想到——所有自定义技能和四层架构全部丢失。更糟糕的是，当我尝试恢复原插件版技能系统时，发现官方Superpowers插件在第三方市场已经下架。 那一刻我是崩溃的。30个技能、精心设计的调度规则、用了好几个月的workflow，说没就没。 但没想到的是，这次”灾难”反而让我得到了一个更健壮、更灵活、更可控的技能系统架构。  二、恢复过程第一步：重建基础层首先恢复了顶层的 CLAUDE.md 编码规范，以及所有可以独立运行的本地单文件技能。这些是之前就已经备份好的，恢复相对顺利。 第二步：尝试安装插件（失败）当我尝试通过市场安装官方 Superpowers 插件时，发现插件已经下架。搜索、换源、手动安装……所有方法都试了一遍，确认彻底无法获取。 第三步：转为本地单文件技能Claude 自动执行了最优替代方案：将14个插件子技能全部转为本地单文件技能。每个子技能一个 SKILL.md 文件，纯文本、可编辑、零依赖。 最终结果完整...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/06/06/claude-code-skill-system-recovery/" title="Claude Code技能系统重装恢复：插件下架反而让我的架构更强大了"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-06</div><div class="info-item-2">Claude Code技能系统重装恢复：插件下架反而让我的架构更强大了</div></div><div class="info-2"><div class="info-item-1">Claude Code技能系统重装恢复：插件下架反而让我的架构更强大了一、背景就在前几天，我重装了 Claude Code CLI。本以为只是简单的环境重建，没想到——所有自定义技能和四层架构全部丢失。更糟糕的是，当我尝试恢复原插件版技能系统时，发现官方Superpowers插件在第三方市场已经下架。 那一刻我是崩溃的。30个技能、精心设计的调度规则、用了好几个月的workflow，说没就没。 但没想到的是，这次”灾难”反而让我得到了一个更健壮、更灵活、更可控的技能系统架构。  二、恢复过程第一步：重建基础层首先恢复了顶层的 CLAUDE.md 编码规范，以及所有可以独立运行的本地单文件技能。这些是之前就已经备份好的，恢复相对顺利。 第二步：尝试安装插件（失败）当我尝试通过市场安装官方 Superpowers 插件时，发现插件已经下架。搜索、换源、手动安装……所有方法都试了一遍，确认彻底无法获取。 第三步：转为本地单文件技能Claude 自动执行了最优替代方案：将14个插件子技能全部转为本地单文件技能。每个子技能一个 SKILL.md 文件，纯文本、可编辑、零依赖。 最终结果完整...</div></div></div></a><a class="pagination-related" href="/2026/06/01/%E6%99%BA%E8%83%BD%E5%8C%BB%E7%96%97HIS%E7%B3%BB%E7%BB%9F%EF%BC%9A%E4%BB%8EFastAPI%E5%88%B0AI%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93%E7%9A%84%E5%85%A8%E6%A0%88%E5%AE%9E%E8%B7%B5/" title="智能医疗HIS系统：从FastAPI到AI多智能体的全栈实践"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-01</div><div class="info-item-2">智能医疗HIS系统：从FastAPI到AI多智能体的全栈实践</div></div><div class="info-2"><div class="info-item-1"> 一个完整的医院信息系统（HIS），覆盖门诊、药房、住院、护理、收费等15个核心业务模块，并深度融合 AI 多智能体引擎实现智能分诊、处方审核和院长问数。    项目概览这是一个真正「能用」的医院信息系统——不只是 CRUD 原型，而是完整的业务闭环。后端基于 FastAPI + SQLAlchemy 2.0 + MySQL，前端使用 Vue 3 + Vite + Element Plus，AI 引擎层采用 LangGraph + LangChain + Qdrant + Redis 架构，接入阿里云百炼 Dashscope 大模型。 技术栈速览   层级 技术选型    后端框架 FastAPI (async)   ORM SQLAlchemy 2.0 (aiomysql 异步驱动)   数据库 MySQL 8.0 (utf8mb4)   前端 Vue 3 + Vite + Element Plus   AI 引擎 LangGraph StateGraph + LangChain   向量数据库 Qdrant (COSINE 距离, 1536 维)   缓存 Redis 7 (...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://avatars.githubusercontent.com/An3035" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">An</div><div class="author-info-description">全栈开发者 / AI 探索者</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">8</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">31</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/An3035"><i class="fab fa-github"></i><span>GitHub</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/An3035" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:1613870384@qq.com" target="_blank" title="邮箱"><i class="fas fa-envelope" style="color: #EA4335;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">记录 AI 开发与全栈学习笔记，持续更新中...</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80%EF%BC%9A%E4%B8%80%E5%91%A8%E7%9A%84%E5%B4%A9%E6%BA%83%EF%BC%8C%E5%B7%AE%E7%82%B9%E6%8A%8A%E9%94%AE%E7%9B%98%E7%A0%B8%E4%BA%86"><span class="toc-number">1.</span> <span class="toc-text">前言：一周的崩溃，差点把键盘砸了</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%85%88%E6%90%9E%E6%87%82%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E6%8E%A7%E5%88%B6%E5%8F%B0%E8%83%BD%E8%B7%91%EF%BC%8C%E6%88%91%E5%90%8E%E7%AB%AF%E8%B7%91%E4%B8%8D%E9%80%9A%EF%BC%9F"><span class="toc-number">2.</span> <span class="toc-text">一、先搞懂：为什么控制台能跑，我后端跑不通？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E9%97%AE%E9%A2%98%EF%BC%9A%E6%A0%BC%E5%BC%8F-%E6%A8%A1%E5%9E%8B-SDK-%E4%B8%89%E8%80%85%E4%B8%8D%E5%8C%B9%E9%85%8D"><span class="toc-number">2.1.</span> <span class="toc-text">核心问题：格式 &#x2F; 模型 &#x2F; SDK 三者不匹配</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%88%91%E8%B8%A9%E8%BF%87%E7%9A%84%E6%89%80%E6%9C%89%E5%9D%91%EF%BC%88%E6%8C%89%E9%A1%BA%E5%BA%8F%E5%A4%8D%E7%9B%98%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">二、我踩过的所有坑（按顺序复盘）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%911%EF%BC%9ATranscription-OSS-%E4%B8%8A%E4%BC%A0%EF%BC%8CFILE-403-FORBIDDEN"><span class="toc-number">3.1.</span> <span class="toc-text">坑1：Transcription + OSS 上传，FILE_403_FORBIDDEN</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%912%EF%BC%9A%E8%87%AA%E5%B7%B1%E6%8B%BC-HTTP-POST-%E8%AF%B7%E6%B1%82%EF%BC%8CURL-%E5%92%8C%E6%A0%BC%E5%BC%8F%E5%85%A8%E9%94%99"><span class="toc-number">3.2.</span> <span class="toc-text">坑2：自己拼 HTTP POST 请求，URL 和格式全错</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%913%EF%BC%9ARecognition-%E7%B1%BB%E7%94%A8%E9%94%99%E6%A8%A1%E5%9E%8B%EF%BC%8CModelNotFound"><span class="toc-number">3.3.</span> <span class="toc-text">坑3：Recognition 类用错模型，ModelNotFound</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%914%EF%BC%9AWindows-%E4%B8%8B-ffmpeg-%E8%BD%AC%E7%A0%81%EF%BC%8C%E5%BC%82%E6%AD%A5%E5%AD%90%E8%BF%9B%E7%A8%8B%E6%8A%A5%E9%94%99"><span class="toc-number">3.4.</span> <span class="toc-text">坑4：Windows 下 ffmpeg 转码，异步子进程报错</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%9C%80%E7%BB%88%E6%88%90%E5%8A%9F%E7%9A%84%E5%AE%8C%E6%95%B4%E6%96%B9%E6%A1%88"><span class="toc-number">4.</span> <span class="toc-text">三、最终成功的完整方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84%E6%80%BB%E8%A7%88"><span class="toc-number">4.1.</span> <span class="toc-text">架构总览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-ffmpeg-%E8%BD%AC%E7%A0%81%E9%80%BB%E8%BE%91%EF%BC%88WebM-%E2%86%92-WAV-PCM-16kHz%EF%BC%89"><span class="toc-number">4.2.</span> <span class="toc-text">1. ffmpeg 转码逻辑（WebM → WAV&#x2F;PCM 16kHz）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Recognition-%E7%B1%BB%E6%AD%A3%E7%A1%AE%E8%B0%83%E7%94%A8-fun-asr-realtime-%E6%A8%A1%E5%9E%8B"><span class="toc-number">4.3.</span> <span class="toc-text">2. Recognition 类正确调用 fun-asr-realtime 模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%AE%8C%E6%95%B4%E7%9A%84-FastAPI-%E6%8E%A5%E5%8F%A3"><span class="toc-number">4.4.</span> <span class="toc-text">3. 完整的 FastAPI 接口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96"><span class="toc-number">4.5.</span> <span class="toc-text">安装依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1"><span class="toc-number">4.6.</span> <span class="toc-text">启动服务</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E9%81%BF%E5%9D%91%E6%80%BB%E7%BB%93%EF%BC%88%E5%B9%B2%E8%B4%A7%EF%BC%8C%E6%8A%84%E4%BD%9C%E4%B8%9A%E7%94%A8%EF%BC%89"><span class="toc-number">5.</span> <span class="toc-text">四、避坑总结（干货，抄作业用）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%BC%E5%BC%8F-%E6%A8%A1%E5%9E%8B-SDK-%E4%B8%A5%E6%A0%BC%E5%8C%B9%E9%85%8D%E8%A1%A8"><span class="toc-number">5.1.</span> <span class="toc-text">1. 格式 &#x2F; 模型 &#x2F; SDK 严格匹配表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%89%8D%E7%AB%AF-WebM-%E5%BF%85%E9%A1%BB%E8%BD%AC%E7%A0%81%EF%BC%8C%E5%88%AB%E6%8C%87%E6%9C%9B%E6%A8%A1%E5%9E%8B%E7%9B%B4%E6%8E%A5%E5%90%83"><span class="toc-number">5.2.</span> <span class="toc-text">2. 前端 WebM 必须转码，别指望模型直接吃</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Windows-%E4%B8%8B-ffmpeg-%E8%BD%AC%E7%A0%81%E7%9A%84%E6%AD%A3%E7%A1%AE%E5%A7%BF%E5%8A%BF"><span class="toc-number">5.3.</span> <span class="toc-text">3. Windows 下 ffmpeg 转码的正确姿势</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E7%99%BE%E7%82%BC%E6%96%B0%E5%B9%B3%E5%8F%B0-SDK-%E4%BD%BF%E7%94%A8%E9%80%9F%E6%9F%A5"><span class="toc-number">5.4.</span> <span class="toc-text">4. 百炼新平台 SDK 使用速查</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E5%BF%83%E6%80%81%E9%81%BF%E5%9D%91"><span class="toc-number">5.5.</span> <span class="toc-text">5. 心态避坑</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E8%AF%AD"><span class="toc-number">6.</span> <span class="toc-text">结语</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/10/aliyun-bailian-asr-pitfalls/" title="阿里云百炼新平台语音识别踩坑全记录：从连续失败到成功的避坑指南">阿里云百炼新平台语音识别踩坑全记录：从连续失败到成功的避坑指南</a><time datetime="2026-06-10T14:30:00.000Z" title="发表于 2026-06-10 22:30:00">2026-06-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/06/claude-code-skill-system-recovery/" title="Claude Code技能系统重装恢复：插件下架反而让我的架构更强大了">Claude Code技能系统重装恢复：插件下架反而让我的架构更强大了</a><time datetime="2026-06-06T07:30:00.000Z" title="发表于 2026-06-06 15:30:00">2026-06-06</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/06/Claude-Code-statusline-guide/" title="零依赖自定义 Claude Code 状态栏：实时监控上下文、技能与会话状态">零依赖自定义 Claude Code 状态栏：实时监控上下文、技能与会话状态</a><time datetime="2026-06-06T04:00:00.000Z" title="发表于 2026-06-06 12:00:00">2026-06-06</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/01/%E6%99%BA%E8%83%BD%E5%8C%BB%E7%96%97HIS%E7%B3%BB%E7%BB%9F%EF%BC%9A%E4%BB%8EFastAPI%E5%88%B0AI%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93%E7%9A%84%E5%85%A8%E6%A0%88%E5%AE%9E%E8%B7%B5/" title="智能医疗HIS系统：从FastAPI到AI多智能体的全栈实践">智能医疗HIS系统：从FastAPI到AI多智能体的全栈实践</a><time datetime="2026-06-01T06:30:00.000Z" title="发表于 2026-06-01 14:30:00">2026-06-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/28/%E4%BB%8E%E6%8C%87%E4%BB%A4%E5%88%B0%E9%97%AD%E7%8E%AF%EF%BC%9A%E6%9E%84%E5%BB%BAAI%E5%8A%A9%E6%89%8B%E5%85%A8%E8%87%AA%E5%8A%A8%E6%8A%80%E8%83%BD%E7%94%9F%E6%80%81%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%AE%9E%E8%B7%B5%E4%B9%8B%E8%B7%AF/" title="从指令到闭环：构建AI助手全自动技能生态系统的实践之路">从指令到闭环：构建AI助手全自动技能生态系统的实践之路</a><time datetime="2026-05-28T08:38:56.000Z" title="发表于 2026-05-28 16:38:56">2026-05-28</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By An</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.5-b1</a></span></div></div><script src="//code.tidio.co/4qcn8mzplip2sduymzb8kjqfssujkit3.js" async="async"></script></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.5-b1"></script><script src="/js/main.js?v=5.5.5-b1"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"inputPosition":"top","lang":"zh-CN","mapping":"pathname"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'An3035/An3035.github.io',
+      'data-repo-id': 'R_kgDOSo6RmQ',
+      'data-category-id': 'DIC_kwDOSo6Rmc4C-SOv',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script src="/js/sci-fi.js?v=5"></script><script>document.addEventListener('DOMContentLoaded',()=>{const e=()=>{const e=document.querySelector('#post-comment .comment-wrap');if(!e)return;const t=document.createElement('div');t.className='giscus-welcome',t.innerHTML='<p style="text-align:center;color:var(--text-meta);padding:12px 16px;margin-bottom:16px;border-left:4px solid<script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.5-b1"></script></div></div></body></html>
